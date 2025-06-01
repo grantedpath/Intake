@@ -2,177 +2,347 @@ import streamlit as st
 from pathlib import Path
 from llm_helper import ask_ollama
 
-st.set_page_config(page_title="Health Universe App Intake", layout="wide")
-st.title("🧾 Health Universe App Intake Form")
+st.set_page_config(page_title="Health Universe Intake Tool", layout="wide")
+st.title("🧠 Health Universe App Intake Form")
+
+css_file = Path("style.css")
+if css_file.exists():
+    with open(css_file) as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 if "form_data" not in st.session_state:
     st.session_state.form_data = {}
 
 with st.sidebar:
-    st.header("📄 Load Reference")
-    ref_doc = st.file_uploader("Upload reference .md file", type=["md"])
-    if ref_doc:
-        ref_content = ref_doc.read().decode("utf-8")
-        st.session_state["ref_doc"] = ref_content
-
+    st.header("📄 Reference Document")
+    uploaded_file = st.file_uploader("Upload .md file", type=["md"])
+    if uploaded_file:
+        st.session_state["ref_doc"] = uploaded_file.read().decode("utf-8")
+    else:
+        st.session_state["ref_doc"] = ""
     st.markdown("---")
     st.header("🧭 Form Progress")
-    completed_sections = [k for k, v in st.session_state.form_data.items() if any(v.values())]
-    st.text(f"Sections Completed: {len(completed_sections)} / 12")
+    completed_sections = sum(bool(v) for v in st.session_state.form_data.values())
+    st.write(f"Sections Completed: {completed_sections} / 12")
 
-def show_llm_modal(section_name):
-    st.session_state["llm_context"] = section_name
-    st.session_state["show_llm_modal"] = True
+def render_text_area(section, label, key, placeholder=""):
+    value = st.text_area(label, placeholder=placeholder, key=f"{section}_{key}")
+    st.session_state.form_data[section][key] = value
 
-def render_text_area(section_key, label, key, default=""):
-    value = st.text_area(label, value=st.session_state.form_data[section_key].get(key, default))
-    st.session_state.form_data[section_key][key] = value
-
-def render_radio(section_key, label, key, options):
-    value = st.radio(label, options, index=0 if not st.session_state.form_data[section_key].get(key) else options.index(st.session_state.form_data[section_key][key]))
-    st.session_state.form_data[section_key][key] = value
-
-def render_checkbox(section_key, label, key):
-    value = st.checkbox(label, value=st.session_state.form_data[section_key].get(key, False))
-    st.session_state.form_data[section_key][key] = value
-
-def render_multiselect(section_key, label, key, options):
-    value = st.multiselect(label, options, default=st.session_state.form_data[section_key].get(key, []))
-    st.session_state.form_data[section_key][key] = value
-
-
-# Section 1: General Context
-with st.expander("📌 Section 1: General Context"):
+with st.expander("🔹 Section 1: General Context"):
     section = "Section 1"
     st.session_state.form_data.setdefault(section, {})
-    render_text_area(section, "App Name", "app_name", "e.g., Framingham Risk Calculator")
-    render_text_area(section, "Purpose & Value", "purpose", "e.g., Estimates 10-year cardiovascular risk using the Framingham equation to guide statin therapy decisions.")
-    render_radio(section, "Intended User", "user_type", ["Clinician", "Researcher", "Patient", "Admin", "Other"])
-    render_text_area(section, "User Description / Details", "explain_user")
-    if st.button("💡 Ask Assistant (Section 1)"):
-        show_llm_modal(section)
+    left, right = st.columns([2, 1])
+    with left:
+        render_text_area(section, "Details", "desc", f"Describe general context here...")
+        if st.button("💡 Ask Assistant (Section 1)"):
+            st.session_state["llm_section"] = section
+    with right:
+        if st.session_state.get("llm_section") == section:
+            st.markdown("### 💬 Assistant")
+            user_question = st.text_area("Ask your question here", key="q_1")
+            if st.button("Get Answer", key="a_1"):
+                context = st.session_state.get("ref_doc", "")
+                prompt = f"You are helping a user complete the section '{section}' of a healthcare app intake form.\n\nReference:\n{context}\n\nUser question: {user_question}"
+                reply = ask_ollama(prompt)
+                st.session_state["llm_response_1"] = reply
+            if "llm_response_1" in st.session_state:
+                st.write(st.session_state["llm_response_1"])
+                if st.button("Insert into Section", key="i_1"):
+                    current = st.session_state.form_data[section].get("llm_note", "")
+                    st.session_state.form_data[section]["llm_note"] = current + "\n" + st.session_state["llm_response_1"]
+                    st.success("✅ Inserted response into notes.")
+            if st.button("Close Assistant", key="c_1"):
+                st.session_state["llm_section"] = None
 
-# Section 2: Core Logic
-with st.expander("🧠 Section 2: Core Logic & Computation"):
+with st.expander("🔹 Section 2: Core Logic"):
     section = "Section 2"
     st.session_state.form_data.setdefault(section, {})
-    render_multiselect(section, "Underlying Method or Model", "method", ["Clinical Guideline", "Rule-based Logic", "Statistical Model", "ML Model", "LLM", "RAG"])
-    render_text_area(section, "Model Logic or Source", "model_logic", "e.g., Logistic regression using systolic BP, age, and smoking status.")
-    render_text_area(section, "Input Formatting & Preprocessing", "preprocessing", "e.g., Convert lbs to kg, ensure LDL is in mg/dL, impute missing values.")
-    if st.button("💡 Ask Assistant (Section 2)"):
-        show_llm_modal(section)
+    left, right = st.columns([2, 1])
+    with left:
+        render_text_area(section, "Details", "desc", f"Describe core logic here...")
+        if st.button("💡 Ask Assistant (Section 2)"):
+            st.session_state["llm_section"] = section
+    with right:
+        if st.session_state.get("llm_section") == section:
+            st.markdown("### 💬 Assistant")
+            user_question = st.text_area("Ask your question here", key="q_2")
+            if st.button("Get Answer", key="a_2"):
+                context = st.session_state.get("ref_doc", "")
+                prompt = f"You are helping a user complete the section '{section}' of a healthcare app intake form.\n\nReference:\n{context}\n\nUser question: {user_question}"
+                reply = ask_ollama(prompt)
+                st.session_state["llm_response_2"] = reply
+            if "llm_response_2" in st.session_state:
+                st.write(st.session_state["llm_response_2"])
+                if st.button("Insert into Section", key="i_2"):
+                    current = st.session_state.form_data[section].get("llm_note", "")
+                    st.session_state.form_data[section]["llm_note"] = current + "\n" + st.session_state["llm_response_2"]
+                    st.success("✅ Inserted response into notes.")
+            if st.button("Close Assistant", key="c_2"):
+                st.session_state["llm_section"] = None
 
-# Section 3: Inputs
-with st.expander("📥 Section 3: Inputs & Data Entry"):
+with st.expander("🔹 Section 3: Inputs & Data Entry"):
     section = "Section 3"
     st.session_state.form_data.setdefault(section, {})
-    render_text_area(section, "List User Inputs", "input_list", "e.g., Age (18–89), LDL (mg/dL), Smoker (Yes/No)")
-    render_multiselect(section, "Supported Upload Types", "upload_types", ["CSV", "JSON", "PDF", "Image"])
-    render_text_area(section, "Expected Schema / Format", "upload_schema", "e.g., CSV with columns: age, smoker, sbp, hdl")
-    if st.button("💡 Ask Assistant (Section 3)"):
-        show_llm_modal(section)
+    left, right = st.columns([2, 1])
+    with left:
+        render_text_area(section, "Details", "desc", f"Describe inputs & data entry here...")
+        if st.button("💡 Ask Assistant (Section 3)"):
+            st.session_state["llm_section"] = section
+    with right:
+        if st.session_state.get("llm_section") == section:
+            st.markdown("### 💬 Assistant")
+            user_question = st.text_area("Ask your question here", key="q_3")
+            if st.button("Get Answer", key="a_3"):
+                context = st.session_state.get("ref_doc", "")
+                prompt = f"You are helping a user complete the section '{section}' of a healthcare app intake form.\n\nReference:\n{context}\n\nUser question: {user_question}"
+                reply = ask_ollama(prompt)
+                st.session_state["llm_response_3"] = reply
+            if "llm_response_3" in st.session_state:
+                st.write(st.session_state["llm_response_3"])
+                if st.button("Insert into Section", key="i_3"):
+                    current = st.session_state.form_data[section].get("llm_note", "")
+                    st.session_state.form_data[section]["llm_note"] = current + "\n" + st.session_state["llm_response_3"]
+                    st.success("✅ Inserted response into notes.")
+            if st.button("Close Assistant", key="c_3"):
+                st.session_state["llm_section"] = None
 
-# Section 4: Outputs
-with st.expander("📤 Section 4: Outputs"):
+with st.expander("🔹 Section 4: Outputs"):
     section = "Section 4"
     st.session_state.form_data.setdefault(section, {})
-    render_multiselect(section, "Output Types", "output_types", ["Score", "Recommendation", "Chart", "Table", "Overlay Image", "PDF/CSV/JSON"])
-    render_text_area(section, "Output Description", "output_detail", "e.g., Score between 0–1 with interpretation: <0.2 Low, 0.2–0.7 Moderate, >0.7 High risk.")
-    if st.button("💡 Ask Assistant (Section 4)"):
-        show_llm_modal(section)
+    left, right = st.columns([2, 1])
+    with left:
+        render_text_area(section, "Details", "desc", f"Describe outputs here...")
+        if st.button("💡 Ask Assistant (Section 4)"):
+            st.session_state["llm_section"] = section
+    with right:
+        if st.session_state.get("llm_section") == section:
+            st.markdown("### 💬 Assistant")
+            user_question = st.text_area("Ask your question here", key="q_4")
+            if st.button("Get Answer", key="a_4"):
+                context = st.session_state.get("ref_doc", "")
+                prompt = f"You are helping a user complete the section '{section}' of a healthcare app intake form.\n\nReference:\n{context}\n\nUser question: {user_question}"
+                reply = ask_ollama(prompt)
+                st.session_state["llm_response_4"] = reply
+            if "llm_response_4" in st.session_state:
+                st.write(st.session_state["llm_response_4"])
+                if st.button("Insert into Section", key="i_4"):
+                    current = st.session_state.form_data[section].get("llm_note", "")
+                    st.session_state.form_data[section]["llm_note"] = current + "\n" + st.session_state["llm_response_4"]
+                    st.success("✅ Inserted response into notes.")
+            if st.button("Close Assistant", key="c_4"):
+                st.session_state["llm_section"] = None
 
-
-# Section 5: Imaging & Overlays
-with st.expander("🖼 Section 5: Imaging & Overlays"):
+with st.expander("🔹 Section 5: Overlays / Imaging"):
     section = "Section 5"
     st.session_state.form_data.setdefault(section, {})
-    render_multiselect(section, "Input Image Formats", "image_formats", ["JPG", "PNG", "DICOM"])
-    render_text_area(section, "Preprocessing Steps", "image_preprocessing", "e.g., Resize to 224x224, convert to grayscale, normalize pixel values.")
-    render_multiselect(section, "Output Overlays", "output_overlays", ["Bounding Boxes", "Heatmaps", "Labels"])
-    render_text_area(section, "Visual Output Experience", "overlay_description", "e.g., Display bounding boxes around detected lesions with confidence scores.")
-    if st.button("💡 Ask Assistant (Section 5)"):
-        show_llm_modal(section)
+    left, right = st.columns([2, 1])
+    with left:
+        render_text_area(section, "Details", "desc", f"Describe overlays / imaging here...")
+        if st.button("💡 Ask Assistant (Section 5)"):
+            st.session_state["llm_section"] = section
+    with right:
+        if st.session_state.get("llm_section") == section:
+            st.markdown("### 💬 Assistant")
+            user_question = st.text_area("Ask your question here", key="q_5")
+            if st.button("Get Answer", key="a_5"):
+                context = st.session_state.get("ref_doc", "")
+                prompt = f"You are helping a user complete the section '{section}' of a healthcare app intake form.\n\nReference:\n{context}\n\nUser question: {user_question}"
+                reply = ask_ollama(prompt)
+                st.session_state["llm_response_5"] = reply
+            if "llm_response_5" in st.session_state:
+                st.write(st.session_state["llm_response_5"])
+                if st.button("Insert into Section", key="i_5"):
+                    current = st.session_state.form_data[section].get("llm_note", "")
+                    st.session_state.form_data[section]["llm_note"] = current + "\n" + st.session_state["llm_response_5"]
+                    st.success("✅ Inserted response into notes.")
+            if st.button("Close Assistant", key="c_5"):
+                st.session_state["llm_section"] = None
 
-# Section 6: Storage & History
-with st.expander("💾 Section 6: Storage & History"):
+with st.expander("🔹 Section 6: Storage & Retrieval"):
     section = "Section 6"
     st.session_state.form_data.setdefault(section, {})
-    render_radio(section, "Storage Mode", "storage_mode", ["Stateless", "Session-based", "Persistent"])
-    render_text_area(section, "Storage Logic", "storage_logic", "e.g., Store session results temporarily; allow optional download as CSV.")
-    if st.button("💡 Ask Assistant (Section 6)"):
-        show_llm_modal(section)
+    left, right = st.columns([2, 1])
+    with left:
+        render_text_area(section, "Details", "desc", f"Describe storage & retrieval here...")
+        if st.button("💡 Ask Assistant (Section 6)"):
+            st.session_state["llm_section"] = section
+    with right:
+        if st.session_state.get("llm_section") == section:
+            st.markdown("### 💬 Assistant")
+            user_question = st.text_area("Ask your question here", key="q_6")
+            if st.button("Get Answer", key="a_6"):
+                context = st.session_state.get("ref_doc", "")
+                prompt = f"You are helping a user complete the section '{section}' of a healthcare app intake form.\n\nReference:\n{context}\n\nUser question: {user_question}"
+                reply = ask_ollama(prompt)
+                st.session_state["llm_response_6"] = reply
+            if "llm_response_6" in st.session_state:
+                st.write(st.session_state["llm_response_6"])
+                if st.button("Insert into Section", key="i_6"):
+                    current = st.session_state.form_data[section].get("llm_note", "")
+                    st.session_state.form_data[section]["llm_note"] = current + "\n" + st.session_state["llm_response_6"]
+                    st.success("✅ Inserted response into notes.")
+            if st.button("Close Assistant", key="c_6"):
+                st.session_state["llm_section"] = None
 
-# Section 7: Document Processing or RAG
-with st.expander("📊 Section 7: Document Processing or RAG"):
+with st.expander("🔹 Section 7: Reference / RAG"):
     section = "Section 7"
     st.session_state.form_data.setdefault(section, {})
-    render_multiselect(section, "Document Formats", "doc_formats", ["PDF", "DOCX", "JSON"])
-    render_radio(section, "Embed Docs at Runtime?", "embed_docs", ["Yes", "No"])
-    render_text_area(section, "Embedding Model", "embedding_model", "e.g., all-MiniLM-L6-v2")
-    render_multiselect(section, "Vector DB", "vector_db", ["FAISS", "Chroma", "Weaviate", "Pinecone"])
-    render_text_area(section, "RAG Logic", "rag_logic", "e.g., Chunk documents by headings; embed on upload; query with top_k=3")
-    if st.button("💡 Ask Assistant (Section 7)"):
-        show_llm_modal(section)
+    left, right = st.columns([2, 1])
+    with left:
+        render_text_area(section, "Details", "desc", f"Describe reference / rag here...")
+        if st.button("💡 Ask Assistant (Section 7)"):
+            st.session_state["llm_section"] = section
+    with right:
+        if st.session_state.get("llm_section") == section:
+            st.markdown("### 💬 Assistant")
+            user_question = st.text_area("Ask your question here", key="q_7")
+            if st.button("Get Answer", key="a_7"):
+                context = st.session_state.get("ref_doc", "")
+                prompt = f"You are helping a user complete the section '{section}' of a healthcare app intake form.\n\nReference:\n{context}\n\nUser question: {user_question}"
+                reply = ask_ollama(prompt)
+                st.session_state["llm_response_7"] = reply
+            if "llm_response_7" in st.session_state:
+                st.write(st.session_state["llm_response_7"])
+                if st.button("Insert into Section", key="i_7"):
+                    current = st.session_state.form_data[section].get("llm_note", "")
+                    st.session_state.form_data[section]["llm_note"] = current + "\n" + st.session_state["llm_response_7"]
+                    st.success("✅ Inserted response into notes.")
+            if st.button("Close Assistant", key="c_7"):
+                st.session_state["llm_section"] = None
 
-# Section 8: Protocol & Integration
-with st.expander("🤖 Section 8: Protocol & Integration Context"):
+with st.expander("🔹 Section 8: App Modality"):
     section = "Section 8"
     st.session_state.form_data.setdefault(section, {})
-    render_radio(section, "App Type", "app_type", ["Streamlit", "FastAPI", "MCP", "A2A"])
-    render_multiselect(section, "MCP Context Fields", "mcp_fields", ["Patient", "Labs", "Problems", "Encounter"])
-    render_text_area(section, "A2A Role", "a2a_role", "e.g., Retriever, Planner, Summarizer")
-    render_text_area(section, "Agent IO Schema", "agent_io", "e.g., Input: {labs, age}; Output: plan_summary")
-    if st.button("💡 Ask Assistant (Section 8)"):
-        show_llm_modal(section)
+    left, right = st.columns([2, 1])
+    with left:
+        render_text_area(section, "Details", "desc", f"Describe app modality here...")
+        if st.button("💡 Ask Assistant (Section 8)"):
+            st.session_state["llm_section"] = section
+    with right:
+        if st.session_state.get("llm_section") == section:
+            st.markdown("### 💬 Assistant")
+            user_question = st.text_area("Ask your question here", key="q_8")
+            if st.button("Get Answer", key="a_8"):
+                context = st.session_state.get("ref_doc", "")
+                prompt = f"You are helping a user complete the section '{section}' of a healthcare app intake form.\n\nReference:\n{context}\n\nUser question: {user_question}"
+                reply = ask_ollama(prompt)
+                st.session_state["llm_response_8"] = reply
+            if "llm_response_8" in st.session_state:
+                st.write(st.session_state["llm_response_8"])
+                if st.button("Insert into Section", key="i_8"):
+                    current = st.session_state.form_data[section].get("llm_note", "")
+                    st.session_state.form_data[section]["llm_note"] = current + "\n" + st.session_state["llm_response_8"]
+                    st.success("✅ Inserted response into notes.")
+            if st.button("Close Assistant", key="c_8"):
+                st.session_state["llm_section"] = None
 
-
-# Section 9: External APIs & Secrets
-with st.expander("🔐 Section 9: External APIs & Secrets"):
+with st.expander("🔹 Section 9: APIs & Plugins"):
     section = "Section 9"
     st.session_state.form_data.setdefault(section, {})
-    render_text_area(section, "External APIs Used", "apis_used", "e.g., OpenAI for text generation, ClinicalTrials.gov for research data")
-    render_text_area(section, "Secrets Required", "secrets", "e.g., OPENAI_API_KEY, DICOM_API_SECRET")
-    render_text_area(section, "Authentication & Error Handling", "auth_error", "e.g., Use API key via header, retry up to 3x with exponential backoff")
-    if st.button("💡 Ask Assistant (Section 9)"):
-        show_llm_modal(section)
+    left, right = st.columns([2, 1])
+    with left:
+        render_text_area(section, "Details", "desc", f"Describe apis & plugins here...")
+        if st.button("💡 Ask Assistant (Section 9)"):
+            st.session_state["llm_section"] = section
+    with right:
+        if st.session_state.get("llm_section") == section:
+            st.markdown("### 💬 Assistant")
+            user_question = st.text_area("Ask your question here", key="q_9")
+            if st.button("Get Answer", key="a_9"):
+                context = st.session_state.get("ref_doc", "")
+                prompt = f"You are helping a user complete the section '{section}' of a healthcare app intake form.\n\nReference:\n{context}\n\nUser question: {user_question}"
+                reply = ask_ollama(prompt)
+                st.session_state["llm_response_9"] = reply
+            if "llm_response_9" in st.session_state:
+                st.write(st.session_state["llm_response_9"])
+                if st.button("Insert into Section", key="i_9"):
+                    current = st.session_state.form_data[section].get("llm_note", "")
+                    st.session_state.form_data[section]["llm_note"] = current + "\n" + st.session_state["llm_response_9"]
+                    st.success("✅ Inserted response into notes.")
+            if st.button("Close Assistant", key="c_9"):
+                st.session_state["llm_section"] = None
 
-# Section 10: UI/UX & Branding
-with st.expander("🎨 Section 10: UI/UX & Branding"):
+with st.expander("🔹 Section 10: UI & UX"):
     section = "Section 10"
     st.session_state.form_data.setdefault(section, {})
-    render_checkbox(section, "Include Logo?", "logo")
-    render_checkbox(section, "Use Sidebar Navigation?", "sidebar_nav")
-    render_checkbox(section, "Use Custom CSS?", "custom_css")
-    render_text_area(section, "Layout and Style Notes", "ui_notes", "e.g., Show summary in sidebar, use tabs for each stage, apply clean clinical colors")
-    if st.button("💡 Ask Assistant (Section 10)"):
-        show_llm_modal(section)
+    left, right = st.columns([2, 1])
+    with left:
+        render_text_area(section, "Details", "desc", f"Describe ui & ux here...")
+        if st.button("💡 Ask Assistant (Section 10)"):
+            st.session_state["llm_section"] = section
+    with right:
+        if st.session_state.get("llm_section") == section:
+            st.markdown("### 💬 Assistant")
+            user_question = st.text_area("Ask your question here", key="q_10")
+            if st.button("Get Answer", key="a_10"):
+                context = st.session_state.get("ref_doc", "")
+                prompt = f"You are helping a user complete the section '{section}' of a healthcare app intake form.\n\nReference:\n{context}\n\nUser question: {user_question}"
+                reply = ask_ollama(prompt)
+                st.session_state["llm_response_10"] = reply
+            if "llm_response_10" in st.session_state:
+                st.write(st.session_state["llm_response_10"])
+                if st.button("Insert into Section", key="i_10"):
+                    current = st.session_state.form_data[section].get("llm_note", "")
+                    st.session_state.form_data[section]["llm_note"] = current + "\n" + st.session_state["llm_response_10"]
+                    st.success("✅ Inserted response into notes.")
+            if st.button("Close Assistant", key="c_10"):
+                st.session_state["llm_section"] = None
 
-# Section 11: README Metadata
-with st.expander("📄 Section 11: README Metadata"):
+with st.expander("🔹 Section 11: README Insights"):
     section = "Section 11"
     st.session_state.form_data.setdefault(section, {})
-    render_text_area(section, "Use Case", "readme_use", "e.g., Primary care clinicians assessing cardiovascular risk")
-    render_text_area(section, "Limitations", "readme_limit", "e.g., Not validated for patients under 18 or with incomplete labs")
-    render_text_area(section, "Evidence or References", "readme_refs", "e.g., Wilson et al. 1998 Framingham Heart Study")
-    render_text_area(section, "Owner's Insight", "readme_owner", "e.g., Built during pilot with Health Universe for risk tool validation")
-    if st.button("💡 Ask Assistant (Section 11)"):
-        show_llm_modal(section)
+    left, right = st.columns([2, 1])
+    with left:
+        render_text_area(section, "Details", "desc", f"Describe readme insights here...")
+        if st.button("💡 Ask Assistant (Section 11)"):
+            st.session_state["llm_section"] = section
+    with right:
+        if st.session_state.get("llm_section") == section:
+            st.markdown("### 💬 Assistant")
+            user_question = st.text_area("Ask your question here", key="q_11")
+            if st.button("Get Answer", key="a_11"):
+                context = st.session_state.get("ref_doc", "")
+                prompt = f"You are helping a user complete the section '{section}' of a healthcare app intake form.\n\nReference:\n{context}\n\nUser question: {user_question}"
+                reply = ask_ollama(prompt)
+                st.session_state["llm_response_11"] = reply
+            if "llm_response_11" in st.session_state:
+                st.write(st.session_state["llm_response_11"])
+                if st.button("Insert into Section", key="i_11"):
+                    current = st.session_state.form_data[section].get("llm_note", "")
+                    st.session_state.form_data[section]["llm_note"] = current + "\n" + st.session_state["llm_response_11"]
+                    st.success("✅ Inserted response into notes.")
+            if st.button("Close Assistant", key="c_11"):
+                st.session_state["llm_section"] = None
 
-# Section 12: Privacy & Compliance
-with st.expander("🛡 Section 12: Privacy & Compliance"):
+with st.expander("🔹 Section 12: Privacy & Compliance"):
     section = "Section 12"
     st.session_state.form_data.setdefault(section, {})
-    render_radio(section, "Handles PHI/PII?", "handles_phi", ["Yes", "No"])
-    render_radio(section, "Requires Anonymization?", "anonymize", ["Yes", "No"])
-    render_multiselect(section, "Compliance Standards", "compliance", ["HIPAA", "GDPR", "Other"])
-    render_text_area(section, "Privacy Measures", "privacy_notes", "e.g., Mask names and MRNs, encrypt stored outputs, restrict access to authorized users")
-    if st.button("💡 Ask Assistant (Section 12)"):
-        show_llm_modal(section)
-        
-# Final Submit and Markdown Export
+    left, right = st.columns([2, 1])
+    with left:
+        render_text_area(section, "Details", "desc", f"Describe privacy & compliance here...")
+        if st.button("💡 Ask Assistant (Section 12)"):
+            st.session_state["llm_section"] = section
+    with right:
+        if st.session_state.get("llm_section") == section:
+            st.markdown("### 💬 Assistant")
+            user_question = st.text_area("Ask your question here", key="q_12")
+            if st.button("Get Answer", key="a_12"):
+                context = st.session_state.get("ref_doc", "")
+                prompt = f"You are helping a user complete the section '{section}' of a healthcare app intake form.\n\nReference:\n{context}\n\nUser question: {user_question}"
+                reply = ask_ollama(prompt)
+                st.session_state["llm_response_12"] = reply
+            if "llm_response_12" in st.session_state:
+                st.write(st.session_state["llm_response_12"])
+                if st.button("Insert into Section", key="i_12"):
+                    current = st.session_state.form_data[section].get("llm_note", "")
+                    st.session_state.form_data[section]["llm_note"] = current + "\n" + st.session_state["llm_response_12"]
+                    st.success("✅ Inserted response into notes.")
+            if st.button("Close Assistant", key="c_12"):
+                st.session_state["llm_section"] = None
+
 st.markdown("---")
 st.subheader("📦 Final Submission")
-
 if st.button("🚀 Submit & Generate Spec"):
     export_lines = ["# Health Universe App Intake Form"]
     for section, content in st.session_state.form_data.items():
