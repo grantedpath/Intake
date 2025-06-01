@@ -380,4 +380,17 @@ with st.expander("🛡 Section 12: Privacy & Compliance"):
                 st.success("✅ Inserted response into notes.")
         if st.button("Close Assistant", key="c_12"):
             st.session_state["llm_section"] = None
+            
+# === Final Submission ===
+st.markdown("---")
+st.subheader("📝 Review & Export")
+if st.button("📤 Submit Form and Generate Markdown"):
+    markdown_output = "# 🧾 Completed Intake Form\n"
+    for section, fields in st.session_state.form_data.items():
+        markdown_output += f"\n## {section}\n"
+        for field, value in fields.items():
+            markdown_output += f"**{field.replace('_', ' ').title()}:**\n{value}\n\n"
+    st.download_button("📄 Download Markdown", data=markdown_output, file_name="intake_form.md")
+    st.markdown("### Preview:")
+    st.markdown(markdown_output)
     
