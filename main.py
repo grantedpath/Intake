@@ -1,6 +1,5 @@
 import streamlit as st
 from pathlib import Path
-from llm_helper import ask_ollama
 
 st.set_page_config(page_title="Health Universe App Intake", layout="wide")
 st.title("🧾 Health Universe App Intake Form")
