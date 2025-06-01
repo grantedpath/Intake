@@ -1,4 +1,3 @@
-
 import streamlit as st
 from pathlib import Path
 from llm_helper import ask_ollama
@@ -14,18 +13,24 @@ if css_file.exists():
 if "form_data" not in st.session_state:
     st.session_state.form_data = {}
 
+
 with st.sidebar:
+    st.image("logo.png", use_column_width=True)  # Optional: remove if no logo file
+    st.markdown("## 🧭 Health Universe Intake")
+    st.markdown("Use this form to define a new app for deployment within the Health Universe platform.")
+    st.markdown("---")
+
     st.header("📄 Reference Document")
     uploaded_file = st.file_uploader("Upload .md file", type=["md"])
     if uploaded_file:
         st.session_state["ref_doc"] = uploaded_file.read().decode("utf-8")
     else:
         st.session_state["ref_doc"] = ""
+
     st.markdown("---")
-    st.header("🧭 Form Progress")
+    st.header("✅ Form Progress")
     completed_sections = sum(bool(v) for v in st.session_state.form_data.values())
     st.write(f"Sections Completed: {completed_sections} / 12")
-
 def render_text_area(section, label, key, placeholder=""):
     value = st.text_area(label, placeholder=placeholder, key=f"{section}_{key}")
     st.session_state.form_data[section][key] = value
@@ -380,7 +385,8 @@ with st.expander("🛡 Section 12: Privacy & Compliance"):
                 st.success("✅ Inserted response into notes.")
         if st.button("Close Assistant", key="c_12"):
             st.session_state["llm_section"] = None
-            
+    
+
 # === Final Submission ===
 st.markdown("---")
 st.subheader("📝 Review & Export")
@@ -393,4 +399,3 @@ if st.button("📤 Submit Form and Generate Markdown"):
     st.download_button("📄 Download Markdown", data=markdown_output, file_name="intake_form.md")
     st.markdown("### Preview:")
     st.markdown(markdown_output)
-    
