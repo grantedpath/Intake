@@ -15,7 +15,7 @@ if "form_data" not in st.session_state:
 
 
 with st.sidebar:
-    st.image("logo.png", use_column_width=True)  # Optional: remove if no logo file
+    #st.image("logo.png", use_column_width=True)  # Optional: remove if no logo file
     st.markdown("## 🧭 Health Universe Intake")
     st.markdown("Use this form to define a new app for deployment within the Health Universe platform.")
     st.markdown("---")
