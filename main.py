@@ -29,12 +29,30 @@ def render_text_area(section, label, key, placeholder=""):
     value = st.text_area(label, placeholder=placeholder, key=f"{section}_{key}")
     st.session_state.form_data[section][key] = value
 
-with st.expander("🔹 Section 1: General Context"):
+def render_radio(section, label, key, options):
+    value = st.radio(label, options, key=f"{section}_{key}")
+    st.session_state.form_data[section][key] = value
+
+def render_checkbox(section, label, key):
+    value = st.checkbox(label, key=f"{section}_{key}")
+    st.session_state.form_data[section][key] = value
+
+def render_multiselect(section, label, key, options):
+    value = st.multiselect(label, options, key=f"{section}_{key}")
+    st.session_state.form_data[section][key] = value
+
+# Section 1: General Context (Detailed)
+with st.expander("📌 Section 1: General Context"):
     section = "Section 1"
     st.session_state.form_data.setdefault(section, {})
     left, right = st.columns([2, 1])
     with left:
-        render_text_area(section, "Details", "desc", f"Describe general context here...")
+        render_text_area(section, "App Name", "app_name", "e.g., Framingham Risk Calculator")
+        render_text_area(section, "Purpose & Clinical Value", "purpose", "e.g., Estimates cardiovascular risk...")
+        render_radio(section, "Who is this app for?", "user_type", ["Clinician", "Researcher", "Patient", "Admin", "Other"])
+        render_text_area(section, "User Description / Behavior", "explain_user", "What will the user do? What do they expect?")
+        render_radio(section, "Where is it used?", "usage_context", ["Point-of-care", "In clinic", "Patient home", "Research lab", "Other"])
+        render_text_area(section, "Related Guidelines or Evidence", "guidelines", "Cite supporting references or literature.")
         if st.button("💡 Ask Assistant (Section 1)"):
             st.session_state["llm_section"] = section
     with right:
@@ -55,12 +73,12 @@ with st.expander("🔹 Section 1: General Context"):
             if st.button("Close Assistant", key="c_1"):
                 st.session_state["llm_section"] = None
 
-with st.expander("🔹 Section 2: Core Logic"):
+with st.expander("📌 Section 2: Core Logic"):
     section = "Section 2"
     st.session_state.form_data.setdefault(section, {})
     left, right = st.columns([2, 1])
     with left:
-        render_text_area(section, "Details", "desc", f"Describe core logic here...")
+        render_text_area(section, "Describe this section's design and goals", "desc_2", "Explain how this applies to the app.")
         if st.button("💡 Ask Assistant (Section 2)"):
             st.session_state["llm_section"] = section
     with right:
@@ -81,12 +99,12 @@ with st.expander("🔹 Section 2: Core Logic"):
             if st.button("Close Assistant", key="c_2"):
                 st.session_state["llm_section"] = None
 
-with st.expander("🔹 Section 3: Inputs & Data Entry"):
+with st.expander("📌 Section 3: Inputs & Data Entry"):
     section = "Section 3"
     st.session_state.form_data.setdefault(section, {})
     left, right = st.columns([2, 1])
     with left:
-        render_text_area(section, "Details", "desc", f"Describe inputs & data entry here...")
+        render_text_area(section, "Describe this section's design and goals", "desc_3", "Explain how this applies to the app.")
         if st.button("💡 Ask Assistant (Section 3)"):
             st.session_state["llm_section"] = section
     with right:
@@ -107,12 +125,12 @@ with st.expander("🔹 Section 3: Inputs & Data Entry"):
             if st.button("Close Assistant", key="c_3"):
                 st.session_state["llm_section"] = None
 
-with st.expander("🔹 Section 4: Outputs"):
+with st.expander("📌 Section 4: Outputs"):
     section = "Section 4"
     st.session_state.form_data.setdefault(section, {})
     left, right = st.columns([2, 1])
     with left:
-        render_text_area(section, "Details", "desc", f"Describe outputs here...")
+        render_text_area(section, "Describe this section's design and goals", "desc_4", "Explain how this applies to the app.")
         if st.button("💡 Ask Assistant (Section 4)"):
             st.session_state["llm_section"] = section
     with right:
@@ -133,12 +151,12 @@ with st.expander("🔹 Section 4: Outputs"):
             if st.button("Close Assistant", key="c_4"):
                 st.session_state["llm_section"] = None
 
-with st.expander("🔹 Section 5: Overlays / Imaging"):
+with st.expander("📌 Section 5: Overlays / Imaging"):
     section = "Section 5"
     st.session_state.form_data.setdefault(section, {})
     left, right = st.columns([2, 1])
     with left:
-        render_text_area(section, "Details", "desc", f"Describe overlays / imaging here...")
+        render_text_area(section, "Describe this section's design and goals", "desc_5", "Explain how this applies to the app.")
         if st.button("💡 Ask Assistant (Section 5)"):
             st.session_state["llm_section"] = section
     with right:
@@ -159,12 +177,12 @@ with st.expander("🔹 Section 5: Overlays / Imaging"):
             if st.button("Close Assistant", key="c_5"):
                 st.session_state["llm_section"] = None
 
-with st.expander("🔹 Section 6: Storage & Retrieval"):
+with st.expander("📌 Section 6: Storage & Retrieval"):
     section = "Section 6"
     st.session_state.form_data.setdefault(section, {})
     left, right = st.columns([2, 1])
     with left:
-        render_text_area(section, "Details", "desc", f"Describe storage & retrieval here...")
+        render_text_area(section, "Describe this section's design and goals", "desc_6", "Explain how this applies to the app.")
         if st.button("💡 Ask Assistant (Section 6)"):
             st.session_state["llm_section"] = section
     with right:
@@ -185,12 +203,12 @@ with st.expander("🔹 Section 6: Storage & Retrieval"):
             if st.button("Close Assistant", key="c_6"):
                 st.session_state["llm_section"] = None
 
-with st.expander("🔹 Section 7: Reference / RAG"):
+with st.expander("📌 Section 7: Reference / RAG"):
     section = "Section 7"
     st.session_state.form_data.setdefault(section, {})
     left, right = st.columns([2, 1])
     with left:
-        render_text_area(section, "Details", "desc", f"Describe reference / rag here...")
+        render_text_area(section, "Describe this section's design and goals", "desc_7", "Explain how this applies to the app.")
         if st.button("💡 Ask Assistant (Section 7)"):
             st.session_state["llm_section"] = section
     with right:
@@ -211,12 +229,12 @@ with st.expander("🔹 Section 7: Reference / RAG"):
             if st.button("Close Assistant", key="c_7"):
                 st.session_state["llm_section"] = None
 
-with st.expander("🔹 Section 8: App Modality"):
+with st.expander("📌 Section 8: App Modality"):
     section = "Section 8"
     st.session_state.form_data.setdefault(section, {})
     left, right = st.columns([2, 1])
     with left:
-        render_text_area(section, "Details", "desc", f"Describe app modality here...")
+        render_text_area(section, "Describe this section's design and goals", "desc_8", "Explain how this applies to the app.")
         if st.button("💡 Ask Assistant (Section 8)"):
             st.session_state["llm_section"] = section
     with right:
@@ -237,12 +255,12 @@ with st.expander("🔹 Section 8: App Modality"):
             if st.button("Close Assistant", key="c_8"):
                 st.session_state["llm_section"] = None
 
-with st.expander("🔹 Section 9: APIs & Plugins"):
+with st.expander("📌 Section 9: APIs & Plugins"):
     section = "Section 9"
     st.session_state.form_data.setdefault(section, {})
     left, right = st.columns([2, 1])
     with left:
-        render_text_area(section, "Details", "desc", f"Describe apis & plugins here...")
+        render_text_area(section, "Describe this section's design and goals", "desc_9", "Explain how this applies to the app.")
         if st.button("💡 Ask Assistant (Section 9)"):
             st.session_state["llm_section"] = section
     with right:
@@ -263,12 +281,12 @@ with st.expander("🔹 Section 9: APIs & Plugins"):
             if st.button("Close Assistant", key="c_9"):
                 st.session_state["llm_section"] = None
 
-with st.expander("🔹 Section 10: UI & UX"):
+with st.expander("📌 Section 10: UI & UX"):
     section = "Section 10"
     st.session_state.form_data.setdefault(section, {})
     left, right = st.columns([2, 1])
     with left:
-        render_text_area(section, "Details", "desc", f"Describe ui & ux here...")
+        render_text_area(section, "Describe this section's design and goals", "desc_10", "Explain how this applies to the app.")
         if st.button("💡 Ask Assistant (Section 10)"):
             st.session_state["llm_section"] = section
     with right:
@@ -289,12 +307,12 @@ with st.expander("🔹 Section 10: UI & UX"):
             if st.button("Close Assistant", key="c_10"):
                 st.session_state["llm_section"] = None
 
-with st.expander("🔹 Section 11: README Insights"):
+with st.expander("📌 Section 11: README Insights"):
     section = "Section 11"
     st.session_state.form_data.setdefault(section, {})
     left, right = st.columns([2, 1])
     with left:
-        render_text_area(section, "Details", "desc", f"Describe readme insights here...")
+        render_text_area(section, "Describe this section's design and goals", "desc_11", "Explain how this applies to the app.")
         if st.button("💡 Ask Assistant (Section 11)"):
             st.session_state["llm_section"] = section
     with right:
@@ -315,12 +333,12 @@ with st.expander("🔹 Section 11: README Insights"):
             if st.button("Close Assistant", key="c_11"):
                 st.session_state["llm_section"] = None
 
-with st.expander("🔹 Section 12: Privacy & Compliance"):
+with st.expander("📌 Section 12: Privacy & Compliance"):
     section = "Section 12"
     st.session_state.form_data.setdefault(section, {})
     left, right = st.columns([2, 1])
     with left:
-        render_text_area(section, "Details", "desc", f"Describe privacy & compliance here...")
+        render_text_area(section, "Describe this section's design and goals", "desc_12", "Explain how this applies to the app.")
         if st.button("💡 Ask Assistant (Section 12)"):
             st.session_state["llm_section"] = section
     with right:
@@ -340,6 +358,7 @@ with st.expander("🔹 Section 12: Privacy & Compliance"):
                     st.success("✅ Inserted response into notes.")
             if st.button("Close Assistant", key="c_12"):
                 st.session_state["llm_section"] = None
+
 
 st.markdown("---")
 st.subheader("📦 Final Submission")
