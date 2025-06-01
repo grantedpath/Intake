@@ -168,3 +168,20 @@ with st.expander("🛡 Section 12: Privacy & Compliance"):
     render_text_area(section, "Privacy Measures", "privacy_notes", "e.g., Mask names and MRNs, encrypt stored outputs, restrict access to authorized users")
     if st.button("💡 Ask Assistant (Section 12)"):
         show_llm_modal(section)
+        
+# Final Submit and Markdown Export
+st.markdown("---")
+st.subheader("📦 Final Submission")
+
+if st.button("🚀 Submit & Generate Spec"):
+    export_lines = ["# Health Universe App Intake Form"]
+    for section, content in st.session_state.form_data.items():
+        export_lines.append(f"\n## {section}")
+        for key, value in content.items():
+            if isinstance(value, list):
+                export_lines.append(f"**{key.replace('_', ' ').title()}**: {', '.join(value)}")
+            else:
+                export_lines.append(f"**{key.replace('_', ' ').title()}**: {value}")
+    export_md = "\n".join(export_lines)
+    st.download_button("📥 Download Markdown File", export_md, file_name="health_universe_intake.md")
+    st.success("✅ Your intake spec has been generated. You can download it above.")
