@@ -13,7 +13,6 @@ if css_file.exists():
 if "form_data" not in st.session_state:
     st.session_state.form_data = {}
 
-
 with st.sidebar:
     #st.image("logo.png", use_column_width=True)  # Optional: remove if no logo file
     st.markdown("## 🧭 Health Universe Intake")
