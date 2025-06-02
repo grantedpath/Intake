@@ -58,9 +58,9 @@ with st.expander("📌 Section 1: General Context"):
         render_text_area(section, "User Description / Behavior", "explain_user", "What will the user do? What do they expect?")
         render_radio(section, "Where is it used?", "usage_context", ["Point-of-care", "In clinic", "Patient home", "Research lab", "Other"])
         render_text_area(section, "Related Guidelines or Evidence", "guidelines", "Cite supporting references or literature.")
+    if st.button("💡 Ask Assistant (Section 1)"):
+            st.session_state["llm_section"] = section 
     with right:
-         if st.button("💡 Ask Assistant (Section 1)"):
-            st.session_state["llm_section"] = section
         if st.session_state.get("llm_section") == section:
             st.markdown("### 💬 Assistant")
             user_question = st.text_area("Ask your question here", key="q_1")
