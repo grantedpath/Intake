@@ -175,6 +175,20 @@ def section12():
         render_text_area(section, "Privacy Handling", "privacy_controls")
         render_llm_assistant(section, "q_12", "a_12", "i_12", "privacy_controls")
 
+# Render all 12 sections
+section1()
+section2()
+section3()
+section4()
+section5()
+section6()
+section7()
+section8()
+section9()
+section10()
+section11()
+section12()
+
 # Final export
 st.markdown("---")
 st.subheader("📝 Review & Export")
