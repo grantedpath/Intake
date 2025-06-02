@@ -58,39 +58,9 @@ with st.expander("📌 Section 1: General Context"):
         render_text_area(section, "User Description / Behavior", "explain_user", "What will the user do? What do they expect?")
         render_radio(section, "Where is it used?", "usage_context", ["Point-of-care", "In clinic", "Patient home", "Research lab", "Other"])
         render_text_area(section, "Related Guidelines or Evidence", "guidelines", "Cite supporting references or literature.")
-    if st.button("💡 Ask Assistant (Section 1)"):
-            st.session_state["llm_section"] = section 
-    with right:
-        if st.session_state.get("llm_section") == section:
-            st.markdown("### 💬 Assistant")
-            user_question = st.text_area("Ask your question here", key="q_1")
-            if st.button("Get Answer", key="a_1"):
-                context = st.session_state.get("ref_doc", "")
-                prompt = f"You are helping a user complete the section '{section 1}' of a healthcare app intake form.\n\nReference:\n{context}\n\nUser question: {user_question}"
-                reply = ask_ollama(prompt)
-                st.session_state["llm_response_1"] = reply
-            if "llm_response_2" in st.session_state:
-                st.write(st.session_state["llm_response_1"])
-                if st.button("Insert into Section", key="i_2"):
-                    current = st.session_state.form_data[section].get("llm_note", "")
-                    st.session_state.form_data[section]["llm_note"] = current + "\n" + st.session_state["llm_response_2"]
-                    st.success("✅ Inserted response into notes.")
-            if st.button("Close Assistant", key="c_1"):
-                st.session_state["llm_section"] = None
-
-# Section 2: Core Logic & Computation
-with st.expander("🧠 Section 2: Core Logic & Computation"):
-    section = "Section 2"
-    st.session_state.form_data.setdefault(section, {})
-    left, right = st.columns([2, 1])
-    with left:
-        render_multiselect(section, "What powers the app?", "method_type",
-            ["Clinical Guideline", "Rule-based Logic", "Statistical Model", "ML Model", "LLM", "RAG"])
-        render_text_area(section, "Model or Rule Description", "model_logic", "Describe logic or model (e.g., logistic regression, scoring system)")
-        render_text_area(section, "Model Inputs & Preprocessing", "model_inputs", "E.g., 'LDL in mg/dL, smokers: Yes/No, missing values trigger warning'")
-    with right:
         if st.button("💡 Ask Assistant (Section 1)"):
             st.session_state["llm_section"] = section
+    with right:
         if st.session_state.get("llm_section") == section:
             st.markdown("### 💬 Assistant")
             user_question = st.text_area("Ask your question here", key="q_1")
@@ -106,6 +76,37 @@ with st.expander("🧠 Section 2: Core Logic & Computation"):
                     st.session_state.form_data[section]["llm_note"] = current + "\n" + st.session_state["llm_response_1"]
                     st.success("✅ Inserted response into notes.")
             if st.button("Close Assistant", key="c_1"):
+                st.session_state["llm_section"] = None
+
+
+# Section 2: Core Logic & Computation
+with st.expander("🧠 Section 2: Core Logic & Computation"):
+    section = "Section 2"
+    st.session_state.form_data.setdefault(section, {})
+    left, right = st.columns([2, 1])
+    with left:
+        render_multiselect(section, "What powers the app?", "method_type",
+            ["Clinical Guideline", "Rule-based Logic", "Statistical Model", "ML Model", "LLM", "RAG"])
+        render_text_area(section, "Model or Rule Description", "model_logic", "Describe logic or model (e.g., logistic regression, scoring system)")
+        render_text_area(section, "Model Inputs & Preprocessing", "model_inputs", "E.g., 'LDL in mg/dL, smokers: Yes/No, missing values trigger warning'")
+    with right:
+        if st.button("💡 Ask Assistant (Section 2)"):
+            st.session_state["llm_section"] = section
+        if st.session_state.get("llm_section") == section:
+            st.markdown("### 💬 Assistant")
+            user_question = st.text_area("Ask your question here", key="q_2")
+            if st.button("Get Answer", key="a_2"):
+                context = st.session_state.get("ref_doc", "")
+                prompt = f"You are helping a user complete the section '{section}' of a healthcare app intake form.\n\nReference:\n{context}\n\nUser question: {user_question}"
+                reply = ask_ollama(prompt)
+                st.session_state["llm_response_2"] = reply
+            if "llm_response_2" in st.session_state:
+                st.write(st.session_state["llm_response_2"])
+                if st.button("Insert into Section", key="i_2"):
+                    current = st.session_state.form_data[section].get("llm_note", "")
+                    st.session_state.form_data[section]["llm_note"] = current + "\n" + st.session_state["llm_response_2"]
+                    st.success("✅ Inserted response into notes.")
+            if st.button("Close Assistant", key="c_2"):
                 st.session_state["llm_section"] = None
 
 
