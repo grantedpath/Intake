@@ -2,7 +2,7 @@ import requests
 
 OLLAMA_URL = "http://localhost:11434/api/generate"
 
-def ask_ollama(prompt: str, model: str = "llama3", system_prompt: str = None) -> str:
+def ask_ollama(prompt: str, model: str = "deepseek-r1:latest", system_prompt: str = None) -> str:
     """
     Sends a prompt to the local Ollama LLM instance and returns the response.
     """
