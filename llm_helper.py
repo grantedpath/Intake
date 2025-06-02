@@ -1,6 +1,6 @@
 import requests
 
-OLLAMA_URL = "http://localhost:11434/api/generate"
+OLLAMA_URL = "http://172.17.0.1:11434/api/generate"
 
 def ask_ollama(prompt: str, model: str = "deepseek-r1:latest", system_prompt: str = None) -> str:
     """
