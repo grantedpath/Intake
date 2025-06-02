@@ -175,6 +175,7 @@ def section12():
         render_text_area(section, "Privacy Handling", "privacy_controls")
         render_llm_assistant(section, "q_12", "a_12", "i_12", "privacy_controls")
 
+
 # Render all 12 sections
 section1()
 section2()
@@ -201,3 +202,114 @@ if st.button("📤 Submit Form and Generate Markdown"):
     st.download_button("📄 Download Markdown", data=markdown_output, file_name="intake_form.md")
     st.markdown("### Preview:")
     st.markdown(markdown_output)
+
+
+
+def section1():
+    with st.expander("📌 Section 1: General Context"):
+        section = "Section 1"
+        st.session_state.form_data.setdefault(section, {})
+        st.write(f"Define inputs for {section} here.")
+        render_llm_assistant(section, "q_1", "a_1", "i_1", "llm_note")
+
+
+def section2():
+    with st.expander("🧠 Section 2: Core Logic & Computation"):
+        section = "Section 2"
+        st.session_state.form_data.setdefault(section, {})
+        st.write(f"Define inputs for {section} here.")
+        render_llm_assistant(section, "q_2", "a_2", "i_2", "llm_note")
+
+
+def section3():
+    with st.expander("📥 Section 3: Inputs & Data Entry"):
+        section = "Section 3"
+        st.session_state.form_data.setdefault(section, {})
+        st.write(f"Define inputs for {section} here.")
+        render_llm_assistant(section, "q_3", "a_3", "i_3", "llm_note")
+
+
+def section4():
+    with st.expander("📤 Section 4: Outputs"):
+        section = "Section 4"
+        st.session_state.form_data.setdefault(section, {})
+        st.write(f"Define inputs for {section} here.")
+        render_llm_assistant(section, "q_4", "a_4", "i_4", "llm_note")
+
+
+def section5():
+    with st.expander("🖼 Section 5: Imaging & Overlays"):
+        section = "Section 5"
+        st.session_state.form_data.setdefault(section, {})
+        st.write(f"Define inputs for {section} here.")
+        render_llm_assistant(section, "q_5", "a_5", "i_5", "llm_note")
+
+
+def section6():
+    with st.expander("💾 Section 6: Storage & History"):
+        section = "Section 6"
+        st.session_state.form_data.setdefault(section, {})
+        st.write(f"Define inputs for {section} here.")
+        render_llm_assistant(section, "q_6", "a_6", "i_6", "llm_note")
+
+
+def section7():
+    with st.expander("📊 Section 7: Document Processing or RAG"):
+        section = "Section 7"
+        st.session_state.form_data.setdefault(section, {})
+        st.write(f"Define inputs for {section} here.")
+        render_llm_assistant(section, "q_7", "a_7", "i_7", "llm_note")
+
+
+def section8():
+    with st.expander("🤖 Section 8: Protocol & Integration Context"):
+        section = "Section 8"
+        st.session_state.form_data.setdefault(section, {})
+        st.write(f"Define inputs for {section} here.")
+        render_llm_assistant(section, "q_8", "a_8", "i_8", "llm_note")
+
+
+def section9():
+    with st.expander("🔐 Section 9: External APIs & Secrets"):
+        section = "Section 9"
+        st.session_state.form_data.setdefault(section, {})
+        st.write(f"Define inputs for {section} here.")
+        render_llm_assistant(section, "q_9", "a_9", "i_9", "llm_note")
+
+
+def section10():
+    with st.expander("🎨 Section 10: UI/UX & Branding"):
+        section = "Section 10"
+        st.session_state.form_data.setdefault(section, {})
+        st.write(f"Define inputs for {section} here.")
+        render_llm_assistant(section, "q_10", "a_10", "i_10", "llm_note")
+
+
+def section11():
+    with st.expander("📄 Section 11: README Metadata"):
+        section = "Section 11"
+        st.session_state.form_data.setdefault(section, {})
+        st.write(f"Define inputs for {section} here.")
+        render_llm_assistant(section, "q_11", "a_11", "i_11", "llm_note")
+
+
+def section12():
+    with st.expander("🛡 Section 12: Privacy & Compliance"):
+        section = "Section 12"
+        st.session_state.form_data.setdefault(section, {})
+        st.write(f"Define inputs for {section} here.")
+        render_llm_assistant(section, "q_12", "a_12", "i_12", "llm_note")
+
+
+section1()
+section2()
+section3()
+section4()
+section5()
+section6()
+section7()
+section8()
+section9()
+section10()
+section11()
+section12()
