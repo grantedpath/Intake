@@ -89,23 +89,23 @@ with st.expander("🧠 Section 2: Core Logic & Computation"):
         render_text_area(section, "Model or Rule Description", "model_logic", "Describe logic or model (e.g., logistic regression, scoring system)")
         render_text_area(section, "Model Inputs & Preprocessing", "model_inputs", "E.g., 'LDL in mg/dL, smokers: Yes/No, missing values trigger warning'")
     with right:
-        if st.button("💡 Ask Assistant (Section 2)"):
+        if st.button("💡 Ask Assistant (Section 1)"):
             st.session_state["llm_section"] = section
         if st.session_state.get("llm_section") == section:
             st.markdown("### 💬 Assistant")
-            user_question = st.text_area("Ask your question here", key="q_2")
-            if st.button("Get Answer", key="a_2"):
+            user_question = st.text_area("Ask your question here", key="q_1")
+            if st.button("Get Answer", key="a_1"):
                 context = st.session_state.get("ref_doc", "")
                 prompt = f"You are helping a user complete the section '{section}' of a healthcare app intake form.\n\nReference:\n{context}\n\nUser question: {user_question}"
                 reply = ask_ollama(prompt)
-                st.session_state["llm_response_2"] = reply
-            if "llm_response_2" in st.session_state:
-                st.write(st.session_state["llm_response_2"])
-                if st.button("Insert into Section", key="i_2"):
+                st.session_state["llm_response_1"] = reply
+            if "llm_response_1" in st.session_state:
+                st.write(st.session_state["llm_response_1"])
+                if st.button("Insert into Section", key="i_1"):
                     current = st.session_state.form_data[section].get("llm_note", "")
-                    st.session_state.form_data[section]["llm_note"] = current + "\n" + st.session_state["llm_response_2"]
+                    st.session_state.form_data[section]["llm_note"] = current + "\n" + st.session_state["llm_response_1"]
                     st.success("✅ Inserted response into notes.")
-            if st.button("Close Assistant", key="c_2"):
+            if st.button("Close Assistant", key="c_1"):
                 st.session_state["llm_section"] = None
 
 
